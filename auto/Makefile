@@ -77,7 +77,8 @@ D.TARGETS = \
 	$(D.DEST)/log.html \
 	$(D.DEST)/glew.html \
 	$(D.DEST)/wglew.html \
-	$(D.DEST)/glxew.html
+	$(D.DEST)/glxew.html \
+	$(D.DEST)/eglew.html
 
 B.TARGETS = \
 	$(B.DEST)/glew.rc \
@@ -92,15 +93,15 @@ OpenGL-Registry/.dummy:
 	@echo "--------------------------------------------------------------------"
 	@echo "Downloading OpenGL-Registry"
 	@echo "--------------------------------------------------------------------"
-	git clone $(REPO_OPENGL) OpenGL-Registry
-	git clone --branch glew $(REPO_GLFIXES) glfixes
+	git clone --depth=1 $(REPO_OPENGL) OpenGL-Registry
+	git clone --depth=1 --branch glew $(REPO_GLFIXES) glfixes
 	touch $@
 
 EGL-Registry/.dummy:
 	@echo "--------------------------------------------------------------------"
 	@echo "Downloading EGL-Registry"
 	@echo "--------------------------------------------------------------------"
-	git clone $(REPO_EGL) EGL-Registry
+	git clone --depth=1 $(REPO_EGL) EGL-Registry
 	touch $@
 
 $(EXT)/.dummy: OpenGL-Registry/.dummy EGL-Registry/.dummy
@@ -108,7 +109,9 @@ $(EXT)/.dummy: OpenGL-Registry/.dummy EGL-Registry/.dummy
 	@echo "OpenGL descriptors"
 	@echo "--------------------------------------------------------------------"
 	rm -rf $(EXT)
-	cp -r glfixes/gl/specs/ANGLE OpenGL-Registry/extensions
+	# Khronos now ships ANGLE_*.txt natively for all but timer_query; only
+	# copy that one from glfixes to avoid duplicating the rest.
+	cp glfixes/gl/specs/ANGLE/timer_query.txt OpenGL-Registry/extensions/ANGLE/ANGLE_timer_query.txt
 	cp -r glfixes/gl/specs/REGAL OpenGL-Registry/extensions
 	$(BIN)/update_ext.sh $(EXT) OpenGL-Registry/extensions $(BLACKLIST)
 	@echo "--------------------------------------------------------------------"
@@ -349,6 +352,16 @@ $(D.DEST)/glxew.html: $(EXT)/.dummy
 	cp -f $(SRC)/header.html $@
 	echo -e "<h2>Supported GLX Extensions</h2>\n" >> $@
 	$(BIN)/make_html.pl $(GLX_EXT_SPEC) >> $@
+	cat $(SRC)/footer.html >> $@
+	perl -i -pe 's#<a href="$(@F)">(.*)</a>#\1#' $@
+
+$(D.DEST)/eglew.html: $(EXT)/.dummy
+	@echo "--------------------------------------------------------------------"
+	@echo "Creating eglew.html"
+	@echo "--------------------------------------------------------------------"
+	cp -f $(SRC)/header.html $@
+	echo -e "<h2>Supported EGL Extensions</h2>\n" >> $@
+	$(BIN)/make_html.pl $(EGL_EXT_SPEC) >> $@
 	cat $(SRC)/footer.html >> $@
 	perl -i -pe 's#<a href="$(@F)">(.*)</a>#\1#' $@
 

@@ -2,7 +2,7 @@
 #define __glew_h__
 #define __GLEW_H__
 
-#if defined(__gl_h_) || defined(__GL_H__) || defined(_GL_H) || defined(__X_GL_H)
+#if defined(__gl_h_) || defined(__GL_H__) || defined(_GL_H) || defined(__gl_gl_h_) || defined(__X_GL_H)
 #error gl.h included before glew.h
 #endif
 #if defined(__gl2_h_)
@@ -25,6 +25,7 @@
 #define __gl2_h_
 #define __GL_H__
 #define _GL_H
+#define __gl_gl_h_
 #define __gltypes_h_
 #define __REGAL_H__
 #define __X_GL_H
@@ -60,11 +61,6 @@
 #    endif
 #  else
 #    define APIENTRY
-#  endif
-#endif
-#ifndef GLAPI
-#  if defined(__MINGW32__) || defined(__CYGWIN__)
-#    define GLAPI extern
 #  endif
 #endif
 /* <winnt.h> */
@@ -106,6 +102,20 @@ typedef _W64 int ptrdiff_t;
 #  define _PTRDIFF_T_
 #endif
 
+/* Issue #403 - Matching khronos_intptr_t and khronos_ssize_t in khrplatform.h */
+
+#ifdef _WIN64
+typedef signed long long int GLintptr;
+typedef signed long long int GLsizeiptr;
+typedef signed long long int GLintptrARB;
+typedef signed long long int GLsizeiptrARB;
+#else
+typedef signed long int      GLintptr;
+typedef signed long int      GLsizeiptr;
+typedef signed long int      GLintptrARB;
+typedef signed long int      GLsizeiptrARB;
+#endif
+
 #ifndef GLAPI
 #  if defined(__MINGW32__) || defined(__CYGWIN__)
 #    define GLAPI extern
@@ -141,7 +151,8 @@ typedef _W64 int ptrdiff_t;
  */
 
 #if defined(__APPLE__) || defined(__linux__)
-#  if defined(__cplusplus)
+/* GCC12 errors out when including <cstdint> with __cplusplus < 201103L */
+#  if defined(__cplusplus) && __cplusplus >= 201103L
 #    include <cstddef>
 #    include <cstdint>
 #  else
@@ -161,6 +172,13 @@ typedef _W64 int ptrdiff_t;
 #    include <stdint.h>
 #  endif
 #endif
+
+/* Issue #403 - Matching khronos_intptr_t and khronos_ssize_t in khrplatform.h */
+
+typedef signed long int GLintptr;
+typedef signed long int GLsizeiptr;
+typedef signed long int GLintptrARB;
+typedef signed long int GLsizeiptrARB;
 
 #define GLEW_APIENTRY_DEFINED
 #define APIENTRY

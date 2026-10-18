@@ -31,7 +31,7 @@
 include config/version
 
 SHELL = /bin/sh
-SYSTEM ?= $(shell config/config.guess | cut -d - -f 3 | sed -e 's/[0-9\.]//g;')
+SYSTEM ?= $(shell config/config.guess | cut -d - -f 3 | sed -e 's/\.//g' -e 's/[0-9]\{1,\}.*//')
 SYSTEM.SUPPORTED = $(shell test -f config/Makefile.$(SYSTEM) && echo 1)
 
 ifeq ($(SYSTEM.SUPPORTED), 1)
@@ -40,11 +40,12 @@ else
 $(error "Platform '$(SYSTEM)' not supported")
 endif
 
-GLEW_PREFIX ?= /usr
-GLEW_DEST ?= /usr
+GLEW_PREFIX ?= /usr/local
+GLEW_DEST ?= /usr/local
 BINDIR    ?= $(GLEW_DEST)/bin
 LIBDIR    ?= $(GLEW_DEST)/lib
-INCDIR    ?= $(GLEW_DEST)/include/GL
+INCLUDEDIR ?= $(GLEW_DEST)/include
+INCDIR    ?= $(INCLUDEDIR)/GL
 PKGDIR    ?= $(GLEW_DEST)/lib/pkgconfig
 
 ifneq ($(GLEW_NO_GLU), -DGLEW_NO_GLU)
@@ -61,7 +62,6 @@ DIST_DIR := $(shell mktemp -d /tmp/glew.XXXXXX)/$(DIST_NAME)
 # To disable stripping of linked binaries either:
 #   - use STRIP= on gmake command-line
 #   - edit this makefile to set STRIP to the empty string
-# (Note: STRIP does not affect the strip in the install step)
 #
 # To disable symlinks:
 #   - use LN= on gmake command-line
@@ -77,6 +77,7 @@ DOS2UNIX ?= dos2unix -q
 
 ifneq (,$(filter debug,$(MAKECMDGOALS)))
 OPT = -g
+STRIP :=
 else
 OPT = $(POPT)
 endif
@@ -89,6 +90,7 @@ all debug: glew.lib glew.bin
 
 LIB.LDFLAGS        := $(LDFLAGS.EXTRA) $(LDFLAGS.GL)
 LIB.LIBS           := $(GL_LDFLAGS)
+LIB.SHARED.DIR     ?= lib
 
 LIB.SRCS           := src/glew.c
 LIB.SRCS.NAMES     := $(notdir $(LIB.SRCS))
@@ -100,7 +102,7 @@ LIB.SOBJS          := $(LIB.SOBJS:.c=.o)
 
 glew.lib: glew.lib.shared glew.lib.static
 
-glew.lib.shared: lib lib/$(LIB.SHARED) glew.pc
+glew.lib.shared: lib $(LIB.SHARED.DIR) $(LIB.SHARED.DIR)/$(LIB.SHARED) glew.pc
 glew.lib.static: lib lib/$(LIB.STATIC) glew.pc
 
 .PHONY: glew.lib glew.lib.shared glew.lib.static
@@ -118,11 +120,11 @@ ifneq ($(STRIP),)
 	$(STRIP) -x $@
 endif
 
-lib/$(LIB.SHARED): $(LIB.SOBJS)
+$(LIB.SHARED.DIR)/$(LIB.SHARED): $(LIB.SOBJS)
 	$(LD) $(LDFLAGS.SO) -o $@ $^ $(LIB.LDFLAGS) $(LIB.LIBS)
 ifneq ($(LN),)
-	$(LN) $(LIB.SHARED) lib/$(LIB.SONAME)
-	$(LN) $(LIB.SHARED) lib/$(LIB.DEVLNK)
+	$(LN) $(LIB.SHARED) $(LIB.SHARED.DIR)/$(LIB.SONAME)
+	$(LN) $(LIB.SHARED) $(LIB.SHARED.DIR)/$(LIB.DEVLNK)
 endif
 ifneq ($(STRIP),)
 	$(STRIP) -x $@
@@ -145,7 +147,7 @@ glew.pc: glew.pc.in
 		-e "s|@prefix@|$(GLEW_PREFIX)|g" \
 		-e "s|@libdir@|$(LIBDIR)|g" \
 		-e "s|@exec_prefix@|$(BINDIR)|g" \
-		-e "s|@includedir@|$(INCDIR)|g" \
+		-e "s|@includedir@|$(INCLUDEDIR)|g" \
 		-e "s|@version@|$(GLEW_VERSION)|g" \
 		-e "s|@cflags@||g" \
 		-e "s|@libname@|$(NAME)|g" \
@@ -170,21 +172,20 @@ VISUALINFO.BIN.OBJ := $(VISUALINFO.BIN.OBJ:.c=.o)
 # Don't build glewinfo or visualinfo for NaCL, yet.
 
 ifneq ($(filter nacl%,$(SYSTEM)),)
-glew.bin: glew.lib bin
+glew.bin: glew.lib
 else
-glew.bin: glew.lib bin bin/$(GLEWINFO.BIN) bin/$(VISUALINFO.BIN) 
+glew.bin: glew.lib bin/$(GLEWINFO.BIN) bin/$(VISUALINFO.BIN)
 endif
 
-bin:
-	mkdir bin
-
-bin/$(GLEWINFO.BIN): $(GLEWINFO.BIN.OBJ) lib/$(LIB.SHARED)
+bin/$(GLEWINFO.BIN): $(GLEWINFO.BIN.OBJ) $(LIB.SHARED.DIR)/$(LIB.SHARED)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ $(GLEWINFO.BIN.OBJ) $(BIN.LIBS)
 ifneq ($(STRIP),)
 	$(STRIP) -x $@
 endif
 
-bin/$(VISUALINFO.BIN): $(VISUALINFO.BIN.OBJ) lib/$(LIB.SHARED)
+bin/$(VISUALINFO.BIN): $(VISUALINFO.BIN.OBJ) $(LIB.SHARED.DIR)/$(LIB.SHARED)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ $(VISUALINFO.BIN.OBJ) $(BIN.LIBS)
 ifneq ($(STRIP),)
 	$(STRIP) -x $@
@@ -209,9 +210,9 @@ install.lib: glew.lib
 # runtime
 ifeq ($(filter-out mingw% cygwin,$(SYSTEM)),)
 	$(INSTALL) -d -m 0755 "$(DESTDIR)$(BINDIR)"
-	$(INSTALL) -m 0755 lib/$(LIB.SHARED) "$(DESTDIR)$(BINDIR)/"
+	$(INSTALL) -m 0755 $(LIB.SHARED.DIR)/$(LIB.SHARED) "$(DESTDIR)$(BINDIR)/"
 else
-	$(INSTALL) -m 0644 lib/$(LIB.SHARED) "$(DESTDIR)$(LIBDIR)/"
+	$(INSTALL) -m 0644 $(LIB.SHARED.DIR)/$(LIB.SHARED) "$(DESTDIR)$(LIBDIR)/"
 endif
 ifneq ($(LN),)
 	$(LN) $(LIB.SHARED) "$(DESTDIR)$(LIBDIR)/$(LIB.SONAME)"
@@ -228,13 +229,15 @@ endif
 
 install.bin: glew.bin
 	$(INSTALL) -d -m 0755 "$(DESTDIR)$(BINDIR)"
-	$(INSTALL) -s -m 0755 bin/$(GLEWINFO.BIN) bin/$(VISUALINFO.BIN) "$(DESTDIR)$(BINDIR)/"
+	$(INSTALL)    -m 0755 bin/$(GLEWINFO.BIN) bin/$(VISUALINFO.BIN) "$(DESTDIR)$(BINDIR)/"
 
 install.include:
 	$(INSTALL) -d -m 0755 "$(DESTDIR)$(INCDIR)"
+	$(INSTALL) -m 0644 include/GL/eglew.h "$(DESTDIR)$(INCDIR)/"
 	$(INSTALL) -m 0644 include/GL/wglew.h "$(DESTDIR)$(INCDIR)/"
 	$(INSTALL) -m 0644 include/GL/glew.h "$(DESTDIR)$(INCDIR)/"
 	$(INSTALL) -m 0644 include/GL/glxew.h "$(DESTDIR)$(INCDIR)/"
+	$(INSTALL) -m 0644 include/GL/eglew.h "$(DESTDIR)$(INCDIR)/"
 
 install.pkgconfig: glew.pc
 	$(INSTALL) -d -m 0755 "$(DESTDIR)$(PKGDIR)"
@@ -242,6 +245,7 @@ install.pkgconfig: glew.pc
 	$(INSTALL) -m 0644 glew.pc "$(DESTDIR)$(PKGDIR)/"
 
 uninstall:
+	$(RM) "$(DESTDIR)$(INCDIR)/eglew.h"
 	$(RM) "$(DESTDIR)$(INCDIR)/wglew.h"
 	$(RM) "$(DESTDIR)$(INCDIR)/glew.h"
 	$(RM) "$(DESTDIR)$(INCDIR)/glxew.h"
@@ -347,7 +351,7 @@ dist-src:
 	find $(DIST_DIR) -name '*.pm' | xargs $(DOS2UNIX)
 	find $(DIST_DIR) -name '*.rc' | xargs $(DOS2UNIX)
 	rm -f $(DIST_SRC_TGZ)
-	cd $(DIST_DIR)/.. && env GZIP=-9 tar czf $(DIST_SRC_TGZ) $(DIST_NAME)
+	cd $(DIST_DIR)/.. && tar -cf - $(DIST_NAME) | gzip -9 > $(DIST_SRC_TGZ)
 	$(RM) -r $(DIST_DIR)
 
 extensions:

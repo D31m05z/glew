@@ -2,42 +2,80 @@
 
 The OpenGL Extension Wrangler Library (GLEW) is a cross-platform open-source C/C++ extension loading library. GLEW provides efficient run-time mechanisms for determining which OpenGL extensions are supported on the target platform. OpenGL core and extension functionality is exposed in a single header file. GLEW has been tested on a variety of operating systems, including Windows, Linux, Mac OS X, FreeBSD, Irix, and Solaris.
 
-![](http://glew.sourceforge.net/glew.png)
-
-http://glew.sourceforge.net/
+[![](http://glew.sourceforge.net/glew.png)](https://github.com/nigels-com/glew)
 
 https://github.com/nigels-com/glew
 
-[![Build Status](https://travis-ci.org/nigels-com/glew.svg?branch=master)](https://travis-ci.org/nigels-com/glew)
-[![Gitter](https://badges.gitter.im/nigels-com/glew.svg)](https://gitter.im/nigels-com/glew?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-[![Download](https://img.shields.io/sourceforge/dm/glew.svg)](https://sourceforge.net/projects/glew/files/latest/download)
+[![GitHub Stars](https://img.shields.io/github/stars/nigels-com/glew)](https://github.com/nigels-com/glew)
+![Contributors](https://img.shields.io/github/contributors/nigels-com/glew)
+[![Commits since release](https://img.shields.io/github/commits-since/nigels-com/glew/latest)](https://github.com/nigels-com/glew/commits/master/)
+[![Issues](https://img.shields.io/github/issues/nigels-com/glew)](https://github.com/nigels-com/glew/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/nigels-com/glew)](https://github.com/nigels-com/glew/pulls)
+
+[![GitHub Downloads](https://img.shields.io/github/downloads/nigels-com/glew/latest/total)](https://github.com/nigels-com/glew/releases)
+[![SourceForge Downloads](https://img.shields.io/sourceforge/dm/glew.svg)](https://sourceforge.net/projects/glew/files/latest/download)
+[![Health](https://codebuild.ap-southeast-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiZ0cxMFNORFBPTGQ5Z1MyRUsxRnU5V1ZyOUNUWmZZRFJwNWdBNng5MnNtdFFObGNsTEJkQkxZa0lHYmtMNEZRREZaZmdvMUh2bDMxVjhFc3c2L29odFQ4PSIsIml2UGFyYW1ldGVyU3BlYyI6InhLVlFqWXVaMEZRVFh6c1QiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)](https://ap-southeast-2.codebuild.aws.amazon.com/project/eyJlbmNyeXB0ZWREYXRhIjoiK3RLWndGOVVkMWthbXRQZCtVTTNOQ0w2dEpxakZ1cVBTNDZ1UldGODdqUERSdkx0U21Nd0RFaGhQL1kycVlmNzh2OXpEYnRKV3hXTVJJdjUvVStCbTl0dkliZm5jRTFsc0VBPSIsIml2UGFyYW1ldGVyU3BlYyI6ImZ0ekRoMkNjaU0rRUt5K2UiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D)
+
+## Table of Contents
+
+* [Downloads](#downloads)
+* [Build](#build)
+	* [Linux and Mac](#linux-and-mac)
+		* [Using GNU Make](#using-gnu-make)
+		* [Install build tools](#install-build-tools)
+		* [Build](#build-1)
+		* [Linux EGL](#linux-egl)
+		* [Linux OSMesa](#linux-osmesa)
+		* [Linux mingw-w64](#linux-mingw-w64)
+	* [Using cmake](#using-cmake)
+		* [Install build tools](#install-build-tools-1)
+		* [Build](#build-2)
+	* [Windows](#windows)
+		* [Visual Studio](#visual-studio)
+		* [MSYS/Mingw](#msysmingw)
+		* [MSYS2/Mingw-w64](#msys2mingw-w64)
+* [glewinfo](#glewinfo)
+* [Code Generation](#code-generation)
+* [Authors](#authors)
+* [Contributions](#contributions)
+* [Copyright and Licensing](#copyright-and-licensing)
 
 ## Downloads
 
-Current release is [2.1.0](https://sourceforge.net/projects/glew/files/glew/2.1.0/).
+### Official Release
+
+Current release is [2.3.1](https://github.com/nigels-com/glew/releases/tag/glew-2.3.1).
 [(Change Log)](http://glew.sourceforge.net/log.html)
 
 Sources available as
-[ZIP](https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.zip/download) or
-[TGZ](https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.tgz/download).
+[ZIP](https://github.com/nigels-com/glew/releases/download/glew-2.3.1/glew-2.3.1.zip) or
+[TGZ](https://github.com/nigels-com/glew/releases/download/glew-2.3.1/glew-2.3.1.tgz).
 
-Windows binaries for [32-bit and 64-bit](https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0-win32.zip/download).
+Windows binaries for [32-bit and 64-bit](https://github.com/nigels-com/glew/releases/download/glew-2.3.1/glew-2.3.1-win32.zip).
 
-### Recent snapshots
+### Perlmint/glew-cmake
 
-Snapshots may contain new features, bug-fixes or new OpenGL extensions ahead of tested, official releases.
+Sources available as
+[ZIP](https://github.com/Perlmint/glew-cmake/archive/refs/tags/glew-cmake-2.3.1.zip) or
+[TGZ](https://github.com/Perlmint/glew-cmake/archive/refs/tags/glew-cmake-2.3.1.tar.gz).
 
-[glew-20181010.tgz](https://sourceforge.net/projects/glew/files/glew/snapshots/glew-20181010.tgz/download) *GLEW 2.2.0 RC1: New extensions, bug fixes*
+Git repository:
+* https `https://github.com/Perlmint/glew-cmake.git`
+* ssh `git@github.com:Perlmint/glew-cmake.git`
 
 ## Build
 
 It is highly recommended to build from a tgz or zip release snapshot.
 The code generation workflow is a complex brew of gnu make, perl and python, that works best on Linux or Mac.
+The code generation is known to work on Windows using [MSYS2](https://www.msys2.org/).
 For most end-users of GLEW the official releases are the best choice, with first class support.
 
 ### Linux and Mac
 
 #### Using GNU Make
+
+GNU make is the primary build system for GLEW, historically.
+It includes targets for building the sources and headers, for maintenance purposes.
 
 ##### Install build tools
 
@@ -57,7 +95,7 @@ Targets:    `all, glew.lib (sub-targets: glew.lib.shared, glew.lib.static), glew
 
 Variables:  `SYSTEM=linux-clang, GLEW_DEST=/usr/local, STRIP=`
 
-_Note: may need to make **auto** folder_
+_Note: you may need to call `make` in the  **auto** folder first_
 
 ##### Linux EGL
 
@@ -77,7 +115,11 @@ _Note: may need to make **auto** folder_
 
 #### Using cmake
 
-*CMake 2.8.12 or higher is required.*
+The cmake build is mostly contributor maintained.
+Due to the multitude of use cases this is maintained on a _best effort_ basis.
+Pull requests are welcome.
+
+*CMake 3.16 or higher is required.*
 
 ##### Install build tools
 
@@ -107,6 +149,7 @@ RedHat/CentOS/Fedora: `$ sudo yum install libXmu-devel libXi-devel libGL-devel c
 | GLEW_REGAL      | Build in Regal mode. |
 | GLEW_OSMESA     | Build in off-screen Mesa mode. |
 | BUILD_FRAMEWORK | Build as MacOSX Framework.  Setting `CMAKE_INSTALL_PREFIX` to `/Library/Frameworks` is recommended. |
+| CLANG_TIDY      | clang-tidy linting mode |
 
 ### Windows
 
@@ -134,7 +177,7 @@ Available from [Msys2](http://msys2.github.io/) and/or [Mingw-w64](http://mingw-
 
 Requirements: bash, make, gcc
 
-	$ pacman -S gcc make  mingw-w64-i686-gcc mingw-w64-x86_64-gcc
+	$ pacman -S gcc make mingw-w64-i686-gcc mingw-w64-x86_64-gcc
 	$ make
 	$ make install
 	$ make install.all
@@ -176,15 +219,6 @@ data is regenerated from the top level source directory with:
 
 	make extensions
 
-An alternative to generating the GLEW sources from scratch is to
-download a pre-generated (unsupported) snapshot:
-
-https://sourceforge.net/projects/glew/files/glew/snapshots/
-
-Travis-built snapshots are also available:
-
-https://glew.s3.amazonaws.com/index.html
-
 ## Authors
 
 GLEW is currently maintained by [Nigel Stewart](https://github.com/nigels-com)
@@ -211,7 +245,7 @@ Be sure to mention platform and compiler toolchain details when filing
 a bug report.  The output of `glewinfo` can be quite useful for discussion
 also.
 
-Generally GLEW is released once a year, around the time of the Siggraph
+Generally GLEW is usually released once a year, around the time of the Siggraph
 computer graphics conference.  If you're not using the current release
 version of GLEW, be sure to check if the issue or bug is fixed there.
 
